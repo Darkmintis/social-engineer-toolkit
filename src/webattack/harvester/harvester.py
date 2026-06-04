@@ -3,6 +3,7 @@ import subprocess
 import sys
 import os
 import re
+import glob
 
 from html import escape
 
@@ -38,6 +39,13 @@ from set_config import WEBATTACK_EMAIL as webattack_email
 from set_config import TRACK_EMAIL_ADDRESSES as track_email
 from set_config import HARVESTER_LOG as logpath
 sys.path.append(definepath)
+
+
+def copy_pem_files(source_pattern, destination):
+    os.makedirs(destination, exist_ok=True)
+    for pem_path in glob.glob(source_pattern):
+        shutil.copy2(pem_path, destination)
+
 
 if track_email == True:
     print_status("You have selected to track user accounts, Apache will automatically be turned on to handle tracking of users.")
@@ -170,11 +178,10 @@ for line in fileopen:
                 sys.path.append("src/core/ssl")
                 # import our ssl module
                 import setssl
-                subprocess.Popen("cp %s/CA/*.pem %s" % (userconfigpath, userconfigpath),
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
+                copy_pem_files(os.path.join(userconfigpath, "CA", "*.pem"), userconfigpath)
                 # remove old junk we dont need anymore
-                subprocess.Popen("rm -rf %s/CA;cp *.pem %s" % (userconfigpath, userconfigpath),
-                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
+                shutil.rmtree(os.path.join(userconfigpath, "CA"), ignore_errors=True)
+                copy_pem_files("*.pem", userconfigpath)
 
         # if user wants to specify his/her own PEM certificate
         if self_signed == "false":
@@ -188,8 +195,7 @@ for line in fileopen:
                         print("\nUnable to find PEM file, check location and config again.")
                         exit_set()
                     if os.path.isfile(pem_client):
-                        subprocess.Popen("cp %s %s/newcert.pem" % (pem_client, userconfigpath),
-                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
+                        shutil.copyfile(pem_client, os.path.join(userconfigpath, "newcert.pem"))
                 match2 = re.search("PEM_SERVER=", line)
                 if match2:
                     pem_server = line.replace("PEM_SERVER=", "")
@@ -197,8 +203,7 @@ for line in fileopen:
                         print("\nUnable to find PEM file, check location and config again.")
                         exit_set()
                     if os.path.isfile(pem_server):
-                        subprocess.Popen("cp %s %s/newreq.pem" % (pem_server, userconfigpath),
-                                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
+                        shutil.copyfile(pem_server, os.path.join(userconfigpath, "newreq.pem"))
 
 # url decode for postbacks
 def htc(m):
@@ -207,7 +212,7 @@ def htc(m):
 # url decode
 def urldecode(url):
     url = url.decode('utf-8')
-    rex = re.compile('%([0-9a-hA-H][0-9a-hA-H])', re.M)
+    rex = re.compile('%([0-9a-fA-F][0-9a-fA-F])', re.M)
     return rex.sub(htc, url)
 
 # here is where we specify how many people actually visited versus fell for it
@@ -611,7 +616,10 @@ if ssl_flag == 'true':
     if not os.path.isfile(userconfigpath + "newcert.pem"):
         print("PEM files not detected. SSL will not work properly.")
     # copy over our PEM files
-    subprocess.Popen("cp %s/*.pem %s/web_clone/" % (userconfigpath, userconfigpath), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True).wait()
+    copy_pem_files(
+        os.path.join(userconfigpath, "*.pem"),
+        os.path.join(userconfigpath, "web_clone"),
+    )
     # copy patched socket over to web clone
     definepath = os.getcwd()
     # we need to move a modified version of socket to handle SSL

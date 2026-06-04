@@ -227,3 +227,16 @@ def test_java_payload_encoding_uses_generated_data_not_literals():
     assert 'subprocess.Popen("cp %s/shellcodeexec.custom' not in source
     assert 'subprocess.Popen("mv %s/web_clone/index.html.new' not in source
     assert 'os.path.join(userconfigpath, "web_clone", "index.html.new")' in source
+
+
+def test_harvester_uses_python_file_operations_for_pem_files():
+    source = Path("src/webattack/harvester/harvester.py").read_text()
+
+    assert 'subprocess.Popen("cp %s/CA/*.pem' not in source
+    assert 'subprocess.Popen("rm -rf %s/CA;cp *.pem' not in source
+    assert 'subprocess.Popen("cp %s %s/newcert.pem' not in source
+    assert 'subprocess.Popen("cp %s %s/newreq.pem' not in source
+    assert 'subprocess.Popen("cp %s/*.pem %s/web_clone/"' not in source
+    assert "def copy_pem_files(source_pattern, destination):" in source
+    assert 'shutil.rmtree(os.path.join(userconfigpath, "CA"), ignore_errors=True)' in source
+    assert 'rex = re.compile(\'%([0-9a-fA-F][0-9a-fA-F])\', re.M)' in source
