@@ -14,7 +14,7 @@ SET is only for authorized testing where explicit permission and scope have been
 - macOS, experimental
 - Windows through WSL/WSL2 Kali or another supported Linux environment
 
-SET 8.1.0 targets Python 3.11 through Python 3.13.
+SET 8.1.1 targets Python 3.11 through Python 3.13.
 
 ## Installation
 

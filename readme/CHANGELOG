@@ -1,4 +1,11 @@
 ~~~~~~~~~~~~~~~~
+version 8.1.1
+~~~~~~~~~~~~~~~~
+
+* handle missing legacy Java shellcode injector payload artifacts with a clear error instead of a traceback
+* fix the multi-pyinject payload choice typo so existing artifacts are selected correctly
+
+~~~~~~~~~~~~~~~~
 version 8.1.0
 ~~~~~~~~~~~~~~~~
 
