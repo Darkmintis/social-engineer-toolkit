@@ -1,4 +1,12 @@
 ~~~~~~~~~~~~~~~~
+version 8.1.2
+~~~~~~~~~~~~~~~~
+
+* fix Python 3 runtime errors in the Binary2Teensy generator caused by removed Python 2 builtins and byte/string handling
+* create the QR-code reports directory before writing generated QR images
+* fix Python 3 encrypted HTTP listener AES initialization, request-header parsing, POST decoding, and URL hex decoding
+
+~~~~~~~~~~~~~~~~
 version 8.1.1
 ~~~~~~~~~~~~~~~~
 
